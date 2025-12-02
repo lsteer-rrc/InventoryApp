@@ -1,9 +1,8 @@
 import json
 import boto3
-import ulid
+import uuid
 
 def lambda_handler(event, context):
-    # Parse incoming JSON data
     try:
         data = json.loads(event['body'])
     except (KeyError, TypeError, json.JSONDecodeError):
@@ -12,14 +11,11 @@ def lambda_handler(event, context):
             'body': json.dumps("Bad request. Please provide valid JSON data.")
         }
 
-    # DynamoDB setup
     dynamo_client = boto3.client('dynamodb')
     table_name = 'Inventory'
 
-    # Generate a unique ID using ULID
-    unique_id = str(ulid.new())
+    unique_id = str(uuid.uuid4())  # Standard library UUID
 
-    # Prepare the item for DynamoDB
     try:
         dynamo_client.put_item(
             TableName=table_name,
