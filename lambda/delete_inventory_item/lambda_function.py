@@ -41,3 +41,4 @@ def lambda_handler(event, context):
             'body': json.dumps(f"Error deleting item: {str(e)}")
         }
     
+    
