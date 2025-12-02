@@ -43,3 +43,4 @@ def lambda_handler(event, context):
             'body': json.dumps(f"Error adding item: {str(e)}")
         }
     
+    
