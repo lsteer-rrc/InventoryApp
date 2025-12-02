@@ -1,8 +1,9 @@
 import boto3
 import json
 
+
 def lambda_handler(event, context):
-    # DynamoDB setup
+    # Initialize a DynamoDB client
     dynamo_client = boto3.client('dynamodb')
     table_name = 'Inventory'
 
@@ -16,7 +17,6 @@ def lambda_handler(event, context):
     item_id = event['pathParameters']['id']
 
     # Prepare the key for DynamoDB
-    # Since this table uses a sort key, we need 'location_id' from query parameters
     if 'queryStringParameters' not in event or 'location_id' not in event['queryStringParameters']:
         return {
             'statusCode': 400,
@@ -43,7 +43,7 @@ def lambda_handler(event, context):
 
         return {
             'statusCode': 200,
-            'body': json.dumps(item, default=str)  # Handle types like Decimal
+            'body': json.dumps(item, default=str)
         }
     except Exception as e:
         print(e)

@@ -11,7 +11,6 @@ def lambda_handler(event, context):
             'body': json.dumps("Bad request. No body provided.")
         }
 
-    # If body is already dict (some test setups)
     if isinstance(body, dict):
         data = body
     else:

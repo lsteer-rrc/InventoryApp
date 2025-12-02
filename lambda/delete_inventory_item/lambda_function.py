@@ -5,7 +5,6 @@ def lambda_handler(event, context):
     dynamo_client = boto3.client('dynamodb')
     table_name = 'Inventory'
 
-    # Get PK from path parameter
     try:
         item_id = event['pathParameters']['id']
     except (KeyError, TypeError):
@@ -14,7 +13,6 @@ def lambda_handler(event, context):
             'body': json.dumps("Missing 'id' path parameter")
         }
 
-    # Get SK from query string
     try:
         location_id = event['queryStringParameters']['location_id']
     except (KeyError, TypeError):
@@ -23,10 +21,9 @@ def lambda_handler(event, context):
             'body': json.dumps("Missing 'location_id' query parameter")
         }
 
-    # Construct DynamoDB key
     key = {
-        'id': {'S': item_id},              # PK is string
-        'location_id': {'N': str(location_id)}  # SK is number
+        'id': {'S': item_id},
+        'location_id': {'N': str(location_id)}
     }
 
     try:
