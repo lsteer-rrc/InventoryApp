@@ -3,18 +3,29 @@ import boto3
 import uuid
 
 def lambda_handler(event, context):
-    try:
-        data = json.loads(event['body'])
-    except (KeyError, TypeError, json.JSONDecodeError):
+    body = event.get('body')
+    
+    if not body:
         return {
             'statusCode': 400,
-            'body': json.dumps("Bad request. Please provide valid JSON data.")
+            'body': json.dumps("Bad request. No body provided.")
         }
+
+    # If body is already dict (some test setups)
+    if isinstance(body, dict):
+        data = body
+    else:
+        try:
+            data = json.loads(body)
+        except json.JSONDecodeError:
+            return {
+                'statusCode': 400,
+                'body': json.dumps("Bad request. Invalid JSON.")
+            }
 
     dynamo_client = boto3.client('dynamodb')
     table_name = 'Inventory'
-
-    unique_id = str(uuid.uuid4())  # Standard library UUID
+    unique_id = str(uuid.uuid4())
 
     try:
         dynamo_client.put_item(
