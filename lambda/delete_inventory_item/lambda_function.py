@@ -5,7 +5,7 @@ def lambda_handler(event, context):
     dynamo_client = boto3.client('dynamodb')
     table_name = 'Inventory'
 
-    # Get ID from path parameters
+    # Get PK from path parameter
     try:
         item_id = event['pathParameters']['id']
     except (KeyError, TypeError):
@@ -14,22 +14,35 @@ def lambda_handler(event, context):
             'body': json.dumps("Missing 'id' path parameter")
         }
 
-    key = {'id': {'S': item_id}}  # Use only partition key
+    # Get SK from query string
+    try:
+        location_id = event['queryStringParameters']['location_id']
+    except (KeyError, TypeError):
+        return {
+            'statusCode': 400,
+            'body': json.dumps("Missing 'location_id' query parameter")
+        }
+
+    # Construct DynamoDB key
+    key = {
+        'id': {'S': item_id},              # PK is string
+        'location_id': {'N': str(location_id)}  # SK is number
+    }
 
     try:
         dynamo_client.delete_item(
             TableName=table_name,
             Key=key,
-            ConditionExpression="attribute_exists(id)"
+            ConditionExpression="attribute_exists(id) AND attribute_exists(location_id)"
         )
         return {
             'statusCode': 200,
-            'body': json.dumps(f"Item with ID {item_id} deleted successfully.")
+            'body': json.dumps(f"Item with ID {item_id} at location {location_id} deleted successfully.")
         }
     except dynamo_client.exceptions.ConditionalCheckFailedException:
         return {
             'statusCode': 404,
-            'body': json.dumps(f"Item with ID {item_id} not found.")
+            'body': json.dumps(f"Item with ID {item_id} at location {location_id} not found.")
         }
     except Exception as e:
         print(e)
